@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 18/02/2017 10:44:06 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="com.theo.models.Usuario" table="usuario" schema="public" optimistic-lock="version">
+        <id name="usuIde" type="int">
+            <column name="usu_ide" />
+            <generator class="assigned" />
+        </id>
+        <property name="username" type="string">
+            <column name="username" />
+        </property>
+        <property name="password" type="string">
+            <column name="password" />
+        </property>
+    </class>
+</hibernate-mapping>
