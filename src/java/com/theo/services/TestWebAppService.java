@@ -1,23 +1,26 @@
 package com.theo.services;
 
-import com.theo.util.HibernateUtil;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 
 public class TestWebAppService<T> implements ITestWebApp<T> {
 
-    private Session session;
+    private final EntityManager em;
+
+    public TestWebAppService() {
+        em = TestConexion.getInstance().getFactory().createEntityManager();
+    }
 
     @Override
     public boolean Create(T t) throws Exception {
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.save(t);
-            session.getTransaction().commit();
-            session.close();
+            em.getTransaction().begin();
+            em.persist(t);
+            em.getTransaction().commit();
+            em.close();
             return true;
         } catch (HibernateException e) {
             return false;
@@ -27,11 +30,10 @@ public class TestWebAppService<T> implements ITestWebApp<T> {
     @Override
     public boolean Update(T t) throws Exception {
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.update(t);
-            session.getTransaction().commit();
-            session.close();
+            em.getTransaction().begin();
+            em.merge(t);
+            em.getTransaction().commit();
+            em.close();
             return true;
         } catch (HibernateException e) {
             return false;
@@ -41,11 +43,10 @@ public class TestWebAppService<T> implements ITestWebApp<T> {
     @Override
     public boolean Delete(T t) throws Exception {
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.delete(t);
-            session.getTransaction().commit();
-            session.close();
+            em.getTransaction().begin();
+            em.remove(em.merge(t));
+            em.getTransaction().commit();
+            em.close();
             return true;
         } catch (Exception e) {
             return false;
@@ -56,13 +57,12 @@ public class TestWebAppService<T> implements ITestWebApp<T> {
     public List<T> findAll(String t) throws Exception {
         List<T> lista = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            Query query = session.createQuery("select t from " + t + " t");
-            lista = query.list();
-            session.getTransaction().commit();
-            session.clear();
+            em.getTransaction().begin();
+            Query query = em.createQuery("SELECT t FROM " + t + " t");
+            lista = query.getResultList();
+            em.close();
         } catch (HibernateException e) {
+            throw e;
         }
         return lista;
     }
@@ -72,12 +72,10 @@ public class TestWebAppService<T> implements ITestWebApp<T> {
         T t = null;
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            Query query = session.createSQLQuery(q);
-            t = (T) query.uniqueResult();
-            session.getTransaction().commit();
-            session.close();
+            em.getTransaction().begin();
+            Query query = em.createQuery(q);
+            t = (T) query.getSingleResult();
+            em.close();
         } catch (HibernateException e) {
             throw e;
         }
@@ -90,12 +88,10 @@ public class TestWebAppService<T> implements ITestWebApp<T> {
         List<T> lista = null;
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            Query query = session.createQuery(q);
-            lista = query.list();
-            session.getTransaction().commit();
-            session.close();
+            em.getTransaction().begin();
+            Query query = em.createQuery(q);
+            lista = query.getResultList();
+            em.close();
         } catch (HibernateException e) {
             System.out.println("ERROR HIBERNATE: " + e.getMessage());
             throw e;
